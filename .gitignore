@@ -1,0 +1,9 @@
+env/
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
+input.txt
+260326 - project1_neural_networks.docx.pdf
+practice.py
+*.pt
+*.pth
