@@ -1,62 +1,65 @@
-# Character-Level Transformer From Scratch
+<h1 align="center">Character-Level Transformer From Scratch</h1>
 
-This project implements a small GPT-style character language model in PyTorch. The goal is not to build a production language model, but to understand the core machinery behind transformers: embeddings, positional encoding, causal self-attention, multi-head attention, residual connections, LayerNorm, training loops, validation loss, perplexity, and autoregressive generation.
+**Trace a small GPT-style model from character IDs through causal attention, training, and generated text.**
 
-It is part of the TARQ learning sequence.
+Python + PyTorch. CPU or Apple MPS. Tiny Shakespeare downloads separately; running the main script trains a model.
 
-## What It Builds
+By Om Patnaik · repository created July 2026.
 
-- Character-level tokenizer over Tiny Shakespeare
-- Train/validation batching for next-character prediction
-- Token embeddings
-- Fixed sinusoidal positional encoding
-- Causal self-attention with a lower-triangular mask
-- Multi-head attention
-- Transformer blocks with pre-LayerNorm and residual connections
-- Feed-forward network with GELU
-- Weight-tied language-model head
-- AdamW training loop with gradient clipping
-- Validation loss, perplexity, and training curve plot
-- Text generation from the trained model
+## Install
+
+| Platform / path | Start here |
+| --- | --- |
+| Python | `pip install -r requirements.txt` in a virtual environment |
+
+Download Tiny Shakespeare to `input.txt`, then inspect or run `transformer.py`. For a no-training walkthrough, start with `WRITEUP.md` and the saved training curve.
+
+```bash
+python -m compileall -q transformer.py  # inspect syntax without starting training
+```
+
+## Why
+
+You want to understand the tensor shapes and training steps hidden inside a language-model library. This repo implements a small decoder-only transformer with sinusoidal positions, causal multi-head attention, residual blocks, and a tied output head. Generated text is an educational result, not a production language model.
 
 ## Results
 
-The model trains from an initial loss of about `log(vocab_size)` and reaches validation loss around the expected range for a small character-level model.
+![Saved train and validation loss curves for the character-level Tiny Shakespeare transformer](training_curves.png)
 
-![Training curve](training_curves.png)
+The configured run uses 5,000 training steps and evaluates every 500 steps. The plot is saved run evidence; no unsupported final-loss number is claimed.
 
-## Setup
+Rebuild with `python transformer.py` after preparing `input.txt`; this starts training. [Implementation and plotting code](transformer.py) · [Learning writeup](WRITEUP.md).
+
+## Follow the tensor shapes
+
+Read character encoding, batching, embeddings, positional encoding, attention, and loss in order. `CORRECTIONS.md` explains fixes to the learning material.
+
+## Generate after fitting
+
+The script prints loss and perplexity, samples text, and saves `training_curves.png`. It is configured for a small corpus and fixed context length; a loss curve alone does not establish useful language ability.
+
+## Notes from building it
+
+I kept the implementation small enough to inspect each tensor operation. Separating evaluation frequency from the number of evaluation batches corrected an important training-loop detail. I would add resumable full-state checkpoints before relying on a longer run.
+
+## Commands
 
 ```bash
-python3 -m venv env
-source env/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-curl -L -o input.txt https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt
+curl -L -o input.txt https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt  # fetch the corpus
+python transformer.py                         # train, sample, and plot
+python -m compileall -q transformer.py          # check syntax without training
 ```
 
-## Run
+## Verify it yourself
 
 ```bash
-python transformer.py
+python -m compileall -q transformer.py
 ```
 
-The script trains the model, prints train/validation loss and perplexity, generates a text sample, and saves `training_curves.png`.
+Syntax checking does not validate attention numerics or rerun the model. The repository has no automated tensor-shape or causal-mask suite; use the writeup and implementation to inspect those assumptions.
 
-## Files
+## Credits, license and pointers
 
-- `transformer.py` - main implementation
-- `WRITEUP.md` - explanation connecting this model to mBERT/MuRIL and transformer concepts
-- `CORRECTIONS.md` - learning notes and fixes used while working through the curriculum PDF
-- `requirements.txt` - Python dependencies
+Built with PyTorch, Matplotlib, and Tiny Shakespeare from Andrej Karpathy’s `char-rnn` dataset. Sinusoidal positions follow the original Transformer formulation. TARQ learning project; no source license file is present.
 
-## Learning Notes
-
-This is intentionally small. It is a character-level decoder-only transformer trained on a tiny corpus, so generated text will be rough. The value of the project is being able to explain every tensor shape and every training step.
-
-The key mental model:
-
-```text
-text -> character IDs -> batches -> embeddings -> positional encoding
-     -> transformer blocks -> logits -> cross-entropy loss -> gradients
-```
+[Full setup, original notes, and project history](README-DETAILS.md).
